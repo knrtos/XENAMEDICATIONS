@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Easily Editable HTML Table Rows or Cells</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: transparent;
+            color: #054607;
+            font-family: "Comfortaa", sans-serif;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+            font-size: 20px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        th, td {
+            border: 5px solid #498202;
+            padding: 20px;
+            text-align: left;
+            color: #054607;
+            background: rgba(254, 255, 234);
+            border-radius: 5px; /* Rounded edges */
+        }
+
+        th {
+            background-color: #82A436;
+            color: white;
+            font-weight: bold;
+            text-align: center; /* Center the header text */
+        }
+
+        td {
+            text-align: left; /* Keep cell text left-aligned */
+        }
+
+        td:hover {
+            background-color: #447804;
+            color: white;
+            cursor: pointer;
+        }
+
+        .bg-warning {
+            background-color: #498202;
+            color: white;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var defaultXenaData = [
+            {medication: "--", amount: "--", timing: "--"},
+            {medication: "--", amount: "--", timing: "--"},
+            {medication: "--", amount: "--", timing: "--"},
+            {medication: "--", amount: "--", timing: "--"},
+            {medication: "--", amount: "--", timing: "--"}
+        ];
+
+        // Check for existing data in localStorage with a new unique key
+        var storedXenaData = JSON.parse(localStorage.getItem('xenaMedicationData')) || defaultXenaData;
+
+        var generateSennaUniqueId = function() {
+            return Math.random().toString(36).substr(2, 9);
+        };
+
+        var tableHtml = '<table class="table table-hover">';
+        tableHtml += '<thead><tr><th>MEDICATION</th><th>AMOUNT</th><th>TIMING</th></tr></thead>';
+        tableHtml += '<tbody>';
+        $.each(storedXenaData, function(index, record) {
+            var row_id = generateSennaUniqueId();
+            tableHtml += `<tr row_id="${row_id}">
+                            <td><div class="editable_data" edit_type="click" col_name="medication" contenteditable="true">${record.medication}</div></td>
+                            <td><div class="editable_data" edit_type="click" col_name="amount" contenteditable="true">${record.amount}</div></td>
+                            <td><div class="editable_data" edit_type="click" col_name="timing" contenteditable="true">${record.timing}</div></td>
+                        </tr>`;
+        });
+        tableHtml += '</tbody></table>';
+        
+        $('.tbl_user_data').html(tableHtml);
+
+        $(document).on('click', '.editable_data', function(event) {
+            event.preventDefault(); 
+            $(this).attr('contenteditable', 'true').addClass('bg-warning').focus();
+        });
+
+        $(document).on('focusout', '.editable_data', function(event) {
+            event.preventDefault();
+
+            var row_id = $(this).closest('tr').attr('row_id'); 
+            var col_name = $(this).attr('col_name'); 
+            var col_value = $(this).text();
+
+            var rowIndex = $(this).closest('tr').index();
+            storedXenaData[rowIndex][col_name] = col_value;
+
+            localStorage.setItem('xenaMedicationData', JSON.stringify(storedXenaData));
+            $(this).removeClass('bg-warning');
+        });    
+    });
+    </script>
+
+</head>
+<body>
+    <div class="tbl_user_data"></div>
+</body>
+</html>
